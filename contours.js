@@ -56,6 +56,8 @@ var hypsoColor = d3.scaleLinear()
 
 var contourSVG;
 
+var mapboxToken = 'pk.eyJ1IjoiYXhpc21hcHMiLCJhIjoieUlmVFRmRSJ9.CpIxovz1TUWe_ecNLFuHNg';
+
 window.onresize = function () {
   width = mapNode.offsetWidth + 2*buffer;
   height = mapNode.offsetHeight + 2*buffer;
@@ -182,6 +184,66 @@ d3.select('#hypso-high-color').on('change', function () {
 d3.selectAll('#download-geojson, .settings-row.geojson .settings-title').on('click', downloadGeoJson);
 d3.selectAll('#download-png, .settings-row.png .settings-title').on('click', downloadPNG);
 d3.selectAll('#download-svg, .settings-row.svg .settings-title').on('click', downloadSVG);
+
+var searchtimer;
+d3.select('#search input').on('keyup', function () {
+  if (d3.event.keyCode == 13) {
+    if (d3.selectAll('.search-result').size()) {
+      var d = d3.select('.search-result').datum();
+      map.fitBounds([[d.bbox[1], d.bbox[0]], [d.bbox[3], d.bbox[2]]]);
+      d3.select('#search-results').style('display', 'none');
+      d3.select('body').on('click.search', null);
+      this.value = '';
+      if (document.activeElement != document.body) document.activeElement.blur();
+      return;
+    }
+  }
+  clearTimeout(searchtimer);
+  var val = this.value;
+  searchtimer = setTimeout(function () {
+    search(val);
+  }, 250);
+})
+
+function search (val) {
+  if (val.length < 2) {
+    d3.select('#search-results').style('display', 'none')
+      .selectAll('.search-result').remove();
+    d3.select('body').on('click.search', null);
+  }
+  var geocodeURL = 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(val) + '.json?language=en&types=place,locality,neighborhood,poi&access_token=' + mapboxToken;
+  d3.json(geocodeURL, function (error, json) {
+    if (json && json.features && json.features.length) {
+      var restults = d3.select('#search-results').style('display', 'block')
+        .selectAll('.search-result')
+        .data(json.features, function (d) { return d.id });
+
+      restults.enter()
+        .append('div')
+        .attr('class', 'search-result')
+        .classed('highlight', function (d,i) { return i == 0})
+        .html(function (d) { return d.place_name })
+        .on('click', function (d) {
+          map.fitBounds([[d.bbox[1], d.bbox[0]], [d.bbox[3], d.bbox[2]]]);
+          d3.select('#search-results').style('display', 'none');
+          d3.select('body').on('click.search', null);
+          if (document.activeElement != document.body) document.activeElement.blur();
+        });
+
+      restults.exit().remove();
+
+      d3.select('body').on('click.search', function () {
+        if (d3.select('#search').node().contains(d3.event.target)) return;
+        d3.select('#search-results').style('display', 'none');
+        d3.select('body').on('click.search', null);
+      });
+    } else {
+      d3.select('#search-results').style('display', 'none')
+        .selectAll('.search-result').remove();
+      d3.select('body').on('click.search', null);
+    }
+  });
+}
 
 var exampleLocations = [
   {name: 'Mount Fuji', coords: [35.3577, 138.7331, 13]},

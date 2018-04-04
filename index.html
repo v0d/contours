@@ -13,6 +13,8 @@
   <script src="https://d3js.org/d3-color.v1.min.js"></script>
   <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
   <script src="https://d3js.org/d3-scale.v2.min.js"></script>
+  <script src="https://d3js.org/d3-request.v1.min.js"></script>
+  <script src="https://d3js.org/d3-dispatch.v1.min.js"></script>
   <style>
     html, body { 
       margin: 0;
@@ -143,6 +145,40 @@
     #download em {
       color: #d85656;
     }
+
+    #search {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 500;
+      box-shadow: 0 0 10px rgba(0,0,0,.5);
+    }
+
+    #search input {
+      width: 300px;
+      padding: 10px;
+      display: block;
+    }
+
+    #search-results {
+      display: none;
+      width: 300px;
+      background-color: white;
+      border-bottom-left-radius: 5px;
+      border-top-left-radius: 5px;
+    }
+
+    .search-result {
+      padding: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+    }
+
+    .search-result:hover, .search-result.highlight {
+      background-color: #eee;
+    }
   </style>
 </head>
 
@@ -218,6 +254,10 @@
     </div>
     <div id="settings-toggle" title="Edit style"></div>
     <div id="download-toggle" title="Download map or data"></div>
+    <div id="search">
+      <input type="text" placeholder="Search for places..." />
+      <div id="search-results"></div>
+    </div>
   </div>
   <script src='contours.js'></script>
 </body>
