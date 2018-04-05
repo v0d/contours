@@ -185,6 +185,10 @@ d3.selectAll('#download-geojson, .settings-row.geojson .settings-title').on('cli
 d3.selectAll('#download-png, .settings-row.png .settings-title').on('click', downloadPNG);
 d3.selectAll('#download-svg, .settings-row.svg .settings-title').on('click', downloadSVG);
 
+d3.selectAll('.icon-cancel').on('click', function () {
+  d3.select(this.parentNode).classed('show', false);
+})
+
 var searchtimer;
 d3.select('#search input').on('keyup', function () {
   if (d3.event.keyCode == 13) {
@@ -227,6 +231,7 @@ function search (val) {
           map.fitBounds([[d.bbox[1], d.bbox[0]], [d.bbox[3], d.bbox[2]]]);
           d3.select('#search-results').style('display', 'none');
           d3.select('body').on('click.search', null);
+          d3.select('#search input').node().value = '';
           if (document.activeElement != document.body) document.activeElement.blur();
         });
 

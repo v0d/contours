@@ -2,6 +2,7 @@
 <head>
   <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+  <link rel="stylesheet" href="css/fontello.css" />
   <meta charset="utf-8">
   <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
   <script src="lib/leaflet-hash.js"></script>
@@ -58,20 +59,20 @@
       cursor: pointer;
       width: 50px;
       height: 50px;
-      background-position: center center;
-      background-repeat: no-repeat;
-      background-size: 90%;
+      font-size: 50px;
+      text-align: center;
+      color: #666;
+
     }
     #settings-toggle:hover, #download-toggle:hover {
       box-shadow: 0 0 10px rgba(0,0,0,1);
+      color: #333;
     }
     #download-toggle {
       left: auto;
       right: 20px;
-      background-image: url(download.png);
     }
     #settings-toggle {
-      background-image: url(palette.png);
     }
     .settings-title {
       margin: 0 0 10px 0;
@@ -137,9 +138,13 @@
       float: left;
       width: 20px;
       height: 20px;
-      background: url(download.png) center/contain no-repeat;
       margin-right: 10px;
       cursor: pointer; 
+    }
+
+    .download-button .icon-download {
+      font-size: 20px;
+      color: #666;
     }
 
     #download em {
@@ -179,6 +184,18 @@
     .search-result:hover, .search-result.highlight {
       background-color: #eee;
     }
+
+    .icon-cancel {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: #666;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .icon-cancel:hover {
+      color: #333;
+    }
   </style>
 </head>
 
@@ -186,6 +203,7 @@
   <div id='wrapper'>
     <div id='map'></div>
     <div id='settings'>
+      <i class="icon-cancel"></i>
       <div class='settings-row type'>
         <p class="settings-title">Map Type</p>
         <div class="settings-section"><label><input type="radio" name="type" checked value="lines"/><span>Contour lines</span></label></div>
@@ -236,24 +254,25 @@
       </div>
     </div>
     <div id="download">
+      <i class="icon-cancel"></i>
       <div class='settings-row geojson'>
-        <div id="download-geojson" class="download-button"></div>
+        <div id="download-geojson" class="download-button"><i class="icon-download"></i></div>
         <p class="settings-title">GeoJSON</p>
         Download contours for use in GIS or mapping applications. Contours will be exported as overlapping <code>MultiPolygon</code> features, each with an <code>elevation</code> property. <em>This will save geodata only. Styles will not be included!</em>
       </div>
       <div class='settings-row png'>
-        <div id="download-png" class="download-button"></div>
+        <div id="download-png" class="download-button"><i class="icon-download"></i></div>
         <p class="settings-title">PNG image</p>
         Download a raster image of the map, including your chosen styles.
       </div>
       <div class='settings-row svg'>
-        <div id="download-svg" class="download-button"></div>
+        <div id="download-svg" class="download-button"><i class="icon-download"></i></div>
         <p class="settings-title">SVG</p>
         Download contours as vector graphics. <em>This does not work for illuminated contours! It will export polygons, but you'll have better luck achieving the effect in your favorite graphics editing software.</em>
       </div>
     </div>
-    <div id="settings-toggle" title="Edit style"></div>
-    <div id="download-toggle" title="Download map or data"></div>
+    <div id="settings-toggle" title="Edit style"><i class="icon-palette"></i></div>
+    <div id="download-toggle" title="Download map or data"><i class="icon-download"></i></div>
     <div id="search">
       <input type="text" placeholder="Search for places..." />
       <div id="search-results"></div>
