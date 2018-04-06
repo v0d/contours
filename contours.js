@@ -298,7 +298,7 @@ var CanvasLayer = L.GridLayer.extend({
         clearTimeout(wait);
         wait = setTimeout(getRelief,500); // only draw after a reasonable delay, so that we don't redraw on every single tile load
       }
-      img.src = 'http://elevation-tiles-prod.s3.amazonaws.com/terrarium/'+coords.z+'/'+coords.x+'/'+coords.y+'.png'
+      img.src = 'https://elevation-tiles-prod.s3.amazonaws.com/terrarium/'+coords.z+'/'+coords.x+'/'+coords.y+'.png'
       return tile;
   }
 });
