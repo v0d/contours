@@ -43,7 +43,7 @@ var lineWidth = .75;
 var lineWidthMajor = 1.5;
 var lineColor = '#8c7556';
 
-var highlightColor = '#B1AEA4';
+var highlightColor = 'rgba(177,174,164,.5)';
 var shadowColor = '#5b5143';
 var shadowSize = 2;
 
@@ -53,6 +53,11 @@ var hypsoColor = d3.scaleLinear()
   .domain([0, 6000])
   .range(["#486341", "#e5d9c9"])
   .interpolate(d3.interpolateHcl);
+var oceanColor = '#d5f2ff';
+var bathyColorType = 'none';
+var bathyColor = d3.scaleLinear()
+  .domain([0, 6000])
+  .range(["#315d9b", "#d5f2ff"]);
 
 var contourSVG;
 
@@ -116,7 +121,8 @@ d3.select('#line-color').on('change', function () {
 });
 
 d3.select('#highlight-color').on('change', function () {
-  highlightColor = this.value;
+  var rgba = toRGBA(this.value);
+  highlightColor = rgba.slice(0, rgba.lastIndexOf(',')) + ',.5)';
   clearTimeout(wait);
   wait = setTimeout(drawContours,500);
 });
@@ -181,6 +187,51 @@ d3.select('#hypso-high-color').on('change', function () {
   wait = setTimeout(drawContours,500);
 });
 
+d3.selectAll('input[name="bathy"]').on('change', function () {
+  if (d3.select('#no-bathy').node().checked) {
+    d3.select('#solid-bathy-style').classed('disabled', true);
+    d3.select('#bathy-style').classed('disabled', true);
+    bathyColorType = 'none';
+    hypsoColor.domain([min,max]);
+  } else if (d3.select('#solid-bathy').node().checked) {
+    d3.select('#solid-bathy-style').classed('disabled', false);
+    d3.select('#bathy-style').classed('disabled', true);
+    bathyColorType = 'solid';
+    hypsoColor.domain([0, max]);
+  } else {
+    d3.select('#solid-bathy-style').classed('disabled', true);
+    d3.select('#bathy-style').classed('disabled', false);
+    bathyColorType = 'bathy';
+    hypsoColor.domain([0, max]);
+  }
+  d3.selectAll('#solid-bathy-style input, #bathy-style input').attr('disabled', null);
+  d3.selectAll('.disabled input').attr('disabled', 'disabled');
+  drawContours();
+})
+
+d3.select('#solid-bathy-color').on('change', function () {
+  oceanColor = this.value;
+  clearTimeout(wait);
+  wait = setTimeout(drawContours,500);
+});
+
+d3.select('#bathy-low-color').on('change', function () {
+  bathyColor.range([this.value, bathyColor.range()[1]]);
+  clearTimeout(wait);
+  wait = setTimeout(drawContours,500);
+});
+
+d3.select('#bathy-high-color').on('change', function () {
+  bathyColor.range([bathyColor.range()[0], this.value]);
+  clearTimeout(wait);
+  wait = setTimeout(drawContours,500);
+});
+
+d3.select('input[type="checkbox"]').on('change', function () {
+  if (this.checked) referenceLayer.setOpacity(1);
+  else referenceLayer.setOpacity(0);
+});
+
 d3.selectAll('#download-geojson, .settings-row.geojson .settings-title').on('click', downloadGeoJson);
 d3.selectAll('#download-png, .settings-row.png .settings-title').on('click', downloadPNG);
 d3.selectAll('#download-svg, .settings-row.svg .settings-title').on('click', downloadSVG);
@@ -228,7 +279,11 @@ function search (val) {
         .classed('highlight', function (d,i) { return i == 0})
         .html(function (d) { return d.place_name })
         .on('click', function (d) {
-          map.fitBounds([[d.bbox[1], d.bbox[0]], [d.bbox[3], d.bbox[2]]]);
+          console.log(d)
+          if (d.bbox) map.fitBounds([[d.bbox[1], d.bbox[0]], [d.bbox[3], d.bbox[2]]]);
+          else {
+            map.setView(d.center.concat().reverse(), 11)
+          }
           d3.select('#search-results').style('display', 'none');
           d3.select('body').on('click.search', null);
           d3.select('#search input').node().value = '';
@@ -310,7 +365,7 @@ pane.appendChild(contourCanvas);
 
 // custom map pane for the contours, above other layers
 var labelPane = map.createPane('labels');
-var referenceLayer = L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/toner-hybrid/{z}/{x}/{y}.png', {pane:'labels', attribution:'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.'}).addTo(map);
+var referenceLayer = L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/toner-hybrid/{z}/{x}/{y}.png', {pane:'labels', attribution:'Label/road tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.'}).addTo(map);
 
 reverseTransform();
 
@@ -379,6 +434,14 @@ function getContours () {
       return +this.value * interval;
     });
 
+  d3.select('#bathymetry').style('display', min < 0 ? 'inline-block' : 'none');
+  if (min < 0) {
+    bathyColor.domain([min, -1]);
+    if (bathyColorType != 'none') {
+      hypsoColor.domain([0, max]);
+    }
+  }
+
   majorInterval = +d3.select('#major').node().value * interval;
 
   drawContours();
@@ -396,18 +459,20 @@ function drawContours(svg) {
 
       contoursGeoData.forEach(function (c) {
         contourContext.beginPath();
-        if (c.value < 0) {
-          // blue-ish shadow and highlight colors below sea level
-          contourContext.shadowColor = '#4e5c66';
-          contourContext.strokeStyle = 'rgba(224, 242, 255, .25)';
-        } else {
+        if (c.value >= 0 || bathyColorType == 'none') {
           contourContext.shadowColor = shadowColor;
           contourContext.strokeStyle = highlightColor;
+          if (colorType == 'hypso') contourContext.fillStyle = hypsoColor(c.value);
+          else if (colorType == 'solid') contourContext.fillStyle = solidColor;
+          else contourContext.fillStyle = '#fff';
+        } else {
+          // blue-ish shadow and highlight colors below sea level
+          contourContext.shadowColor = '#4e5c66';
+          contourContext.strokeStyle = 'rgba(224, 242, 255, .5)';
+          if (bathyColorType == 'bathy') contourContext.fillStyle = bathyColor(c.value);
+          else if (bathyColorType == 'solid') contourContext.fillStyle = oceanColor;
+          else contourContext.fillStyle = '#fff';
         }
-        if (colorType == 'hypso')
-          contourContext.fillStyle = hypsoColor(c.value);
-        else if (colorType == 'solid') contourContext.fillStyle = solidColor;
-        else contourContext.fillStyle = '#fff';
         path(c);
         // draw the light stroke first, then the fill with drop shadow
         // the effect is a light edge on side and dark on the other, giving the raised/illuminated contour appearance
@@ -417,22 +482,33 @@ function drawContours(svg) {
     } else {
       contourContext.lineWidth = lineWidth;
       contourContext.strokeStyle = lineColor;
-      if (colorType != 'hypso') {
+      if (colorType != 'hypso' && bathyColorType == 'none') {
         contourContext.beginPath();
         contoursGeoData.forEach(function (c) {
           if (majorInterval == 0 || c.value % majorInterval != 0) path(c);
         });
+        contourContext.stroke();
         if (colorType == 'solid') {
           contourContext.fillStyle = solidColor;
           contourContext.fill();
         }
-        contourContext.stroke();
       } else {
         contoursGeoData.forEach(function (c) {
           contourContext.beginPath();
-          if (majorInterval == 0 || c.value % majorInterval != 0) path(c);
-          contourContext.fillStyle = hypsoColor(c.value);
-          contourContext.fill();
+          var fill;
+          if (c.value >= 0 || bathyColorType == 'none') {
+            if (colorType == 'hypso') fill = hypsoColor(c.value);
+            else if (colorType == 'solid') fill = solidColor;
+            else if (bathyColorType != 'none') fill = '#fff'; // to mask out ocean if ocean is colored
+          } else {
+            if (bathyColorType == 'bathy') fill = bathyColor(c.value);
+            else if (bathyColorType == 'solid') fill = oceanColor;
+          }
+          path(c);
+          if (fill) {
+            contourContext.fillStyle = fill;
+            contourContext.fill();
+          }
           contourContext.stroke();
         });
       }
@@ -467,13 +543,15 @@ function drawContours(svg) {
         return type == 'lines' ? (majorInterval != 0 && d.value % majorInterval == 0 ? lineWidthMajor : lineWidth) : shadowSize;
       })
       .attr('fill', function (d) {
-        if (colorType == 'solid') {
-          return solidColor;
-        } else if (colorType == 'hypso') {
-          return hypsoColor(d.value);
+        if (d.value >= 0 || bathyColorType == 'none') {
+          if (colorType == 'hypso') return hypsoColor(d.value);
+          else if (colorType == 'solid') return solidColor;
+          else if (bathyColorType != 'none') return '#fff'; // to mask out ocean if ocean is colored
         } else {
-          return 'none';
+          if (bathyColorType == 'bathy') return bathyColor(d.value);
+          else if (bathyColorType == 'solid') return oceanColor;
         }
+        return 'none';
       })
       .attr('id', function (d) {
         return 'elev-' + d.value;
@@ -575,4 +653,15 @@ function elev(index, demData) {
 // helper to get imageData index for a given x/y
 function getIndexForCoordinates(width, x,y) {
   return width * y * 4 + 4 * x;
+}
+
+function toRGBA (color) {
+  if (color.substr(0, 1) == '#') return hexToRGBA(color).replace(/\s/g, '');
+  if (color.split(',').length == 4) return color.replace(/\s/g, ''); // already rgba
+  return 'rgba' + color.substring(3, color.indexOf(')')).replace(/\s/g, '') + ',1)';
+}
+
+function hexToRGBA (hex) {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? 'rgba(' + parseInt(result[1], 16) + ',' + parseInt(result[2], 16) + ',' + parseInt(result[3], 16) + ',1)' : null;
 }

@@ -50,8 +50,8 @@
     #settings-toggle, #download-toggle {
       position: absolute;
       z-index: 1000;
-      bottom: 20px;
-      left: 20px;
+      bottom: 40px;
+      left: 40px;
       text-shadow: 1px 1px 0 rgba(0,0,0,.75);
       cursor: pointer;
       font-size: 70px;
@@ -63,15 +63,19 @@
     }
     #download-toggle {
       left: auto;
-      right: 20px;
+      right: 40px;
     }
     #settings-toggle {
     }
     .settings-title {
-      margin: 0 0 10px 0;
-      font-size: 1.5rem;
-      color: #666;
+      margin: 0 0 5px 0;
+      font-size: 1.25rem;
+      color: #333;
       vertical-align: middle;
+    }
+    .settings-title.inline {
+      display: inline-block;
+      margin-right: 15px;
     }
     #download .settings-title {
       cursor: pointer;
@@ -79,8 +83,16 @@
     .settings-row {
       margin-bottom: 25px;
     }
+    .settings-row.inline {
+      display: inline-block;
+      vertical-align: top;
+      margin-bottom: 0;
+    }
     .settings-section {
-      margin-right: 15px;
+      margin-right: 20px;
+    }
+    input[type="checkbox"]{
+      margin-bottom: 15px;
     }
     input[type="radio"] {
       -webkit-appearance: none;
@@ -91,6 +103,9 @@
       cursor: pointer;
       padding: 5px;
       border-radius: 5px;
+      min-width: 20px;
+      text-align: center;
+      display: inline-block;
     }
     input[type="radio"] + span:hover{
       background-color: #f7f7f7;
@@ -98,7 +113,6 @@
     input[type="radio"]:checked + span{
       color: #111;
       font-weight: bold;
-      display: inline-block;
       background-color: #58A2D8;
       color: white;
     }
@@ -107,6 +121,8 @@
       font-size: 12px;
       padding: 5px;
       text-align: center;
+      border-radius: 5px;
+      border: 1px solid #ccc;
     }
     #settings input#interval-input {
       width: 50px;
@@ -196,13 +212,14 @@
     <div id='map'></div>
     <div id='settings'>
       <i class="icon-cancel"></i>
+      <label><input type="checkbox" checked> Show roads and labels</input></label>
       <div class='settings-row type'>
-        <p class="settings-title">Map Type</p>
+        <p class="settings-title inline">Map Type</p>
         <div class="settings-section"><label><input type="radio" name="type" checked value="lines"/><span>Contour lines</span></label></div>
         <div class="settings-section"><label><input type="radio" name="type" value="illuminated"/><span>Illuminated contour polygons</span></label></div>
       </div>
       <div class='settings-row unit'>
-        <p class="settings-title">Contour Interval</p>
+        <p class="settings-title inline">Contour Interval</p>
         <div class="settings-section">
           <input type="text" value="500" id="interval-input"/>
           <label><input type="radio" name="unit" value="m"/><span>m</span></label>
@@ -219,7 +236,7 @@
         </div>
       </div>
       <div class='settings-row'>
-        <p class="settings-title">Contour Style</p>
+        <p class="settings-title inline">Contour Style</p>
         <div id="lines-style">
           <div class="settings-section"><label>Contour color: <input id="line-color" type="color" value ="#8c7556"/></label></div>
           <div class="settings-section"><label>Line weight: <input id="line-width" type="text" value="0.75"/></label> pixels</div>
@@ -231,26 +248,40 @@
           <div class="settings-section"><label>Width: <input id="shadow-width" type="text" value="2"/></label> pixels</div>
         </div>
       </div>
-      <div class='settings-row'>
+      <div class='settings-row inline'>
         <p class="settings-title">Background style</p>
-        <label><input type="radio" name="bg" checked value="none" id="no-bg"/><span>None</span></label>
+        <label><input type="radio" name="bg" checked value="none" id="no-bg"/><span>None</span></label><br>
         <label><input type="radio" name="bg" value="solid" id="solid-bg"/><span>Solid color</span></label>
         <div id="solid-style" class="disabled">
           <input id="solid-color" type="color" value ="#fffcfa"/></label>
-        </div>
+        </div><br>
         <label><input type="radio" name="bg" value="hypso"/><span>Hypsometric tints</span></label>
         <div id="hypso-style" class="disabled">
-          <div class="settings-section"><label>Low color: <input id="hypso-low-color" type="color" value ="#486341"/></label></div>
-          <div class="settings-section"><label>High color: <input id="hypso-high-color" type="color" value ="#e5d9c9"/></label></div>
+          <div class="settings-section"><label>Low: <input id="hypso-low-color" type="color" value ="#486341"/></label></div>
+          <div class="settings-section"><label>High: <input id="hypso-high-color" type="color" value ="#e5d9c9"/></label></div>
+        </div>
+      </div>
+      <div class='settings-row inline' id="bathymetry">
+        <p class="settings-title">Bathymetry (colors below sea level)</p>
+        <label><input type="radio" name="bathy" checked value="none" id="no-bathy"/><span>None</span></label><br>
+        <label><input type="radio" name="bathy" value="solid" id="solid-bathy"/><span>Solid color</span></label>
+        <div id="solid-bathy-style" class="disabled">
+          <input id="solid-bathy-color" type="color" value ="#d5f2ff"/></label>
+        </div><br>
+        <label><input type="radio" name="bathy" value="bathy"/><span>Bathymetric tints</span></label>
+        <div id="bathy-style" class="disabled">
+          <div class="settings-section"><label>Low: <input id="bathy-low-color" type="color" value ="#315d9b"/></label></div>
+          <div class="settings-section"><label>Sea level: <input id="bathy-high-color" type="color" value ="#d5f2ff"/></label></div>
         </div>
       </div>
     </div>
     <div id="download">
       <i class="icon-cancel"></i>
+      <em>Roads and labels are provided only for helping your area of interest on this map. They will not be inlcuded in downloads.</em><br><br>
       <div class='settings-row geojson'>
         <div id="download-geojson" class="download-button"><i class="icon-download"></i></div>
         <p class="settings-title">GeoJSON</p>
-        Download contours for use in GIS or mapping applications. Contours will be exported as overlapping <code>MultiPolygon</code> features, each with an <code>elevation</code> property. <em>This will save geodata only. Styles will not be included!</em>
+        Download contours for use in GIS or mapping applications. Contours will be exported as overlapping <code>MultiPolygon</code> features, each with an <code>elevation</code> property. <em>Geodata only. Styles will not be included!</em>
       </div>
       <div class='settings-row png'>
         <div id="download-png" class="download-button"><i class="icon-download"></i></div>
