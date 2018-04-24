@@ -50,6 +50,7 @@
       height: calc(100% - 30px);
       transition: left .5s;
       z-index: 1000;
+      background-color: white;
       box-sizing: border-box;
       box-shadow: 0 0 5px rgba(0,0,0,.5);
       overflow: auto;
@@ -58,14 +59,14 @@
       left: 0;
     }
     #settings, #download { 
-      padding: 20px;
-      height: 100%;
+      min-height: 100%;
       width: 100%;
       box-sizing: border-box;
       position: absolute;
       top: 0;
       left: 0;
       background-color: white;
+      padding-right: 20px;
     }
     #settings.show + #download {
       display: none;
@@ -109,17 +110,13 @@
     #download-toggle {
       top: 100px;
     }
-    #settings-toggle {
-    }
     .settings-title {
-      margin: 0 0 5px 0;
-      font-size: 1.25rem;
+      margin: 0 0 20px 0;
+      font-size: 1.1rem;
       color: #333;
       vertical-align: middle;
-    }
-    .settings-title.inline {
-      display: inline-block;
-      margin-right: 15px;
+      background-color: rgb(237,237,226);
+      padding: 5px 20px;
     }
     #download .settings-title {
       cursor: pointer;
@@ -127,13 +124,11 @@
     .settings-row {
       margin-bottom: 25px;
     }
-    .settings-row.inline {
-      display: inline-block;
-      vertical-align: top;
-      margin-bottom: 0;
-    }
     .settings-section {
-      margin-right: 20px;
+      margin-bottom: 20px;
+    }
+    .settings-content {
+      padding-left: 20px;
     }
     input[type="checkbox"]{
       margin-bottom: 15px;
@@ -174,16 +169,15 @@
     canvas {position: absolute; top:0; left:0;}
     .leaflet-container{ background: white;}
 
-    .settings-row div {
-      display: inline-block;
-    }
-
     #solid-style, #hypso-style {
       margin-left: 10px;
     }
 
     div.disabled {
       opacity: .1;
+    }
+    div.disabled {
+      display: none;
     }
 
     .download-button {
@@ -261,63 +255,86 @@
         <label><input type="checkbox" checked> Show roads and labels</input></label>
         <div class='settings-row type'>
           <p class="settings-title inline">Map Type</p>
-          <div class="settings-section"><label><input type="radio" name="type" checked value="lines"/><span>Contour lines</span></label></div>
-          <div class="settings-section"><label><input type="radio" name="type" value="illuminated"/><span>Illuminated contour polygons</span></label></div>
+            <div class="settings-content">
+            <div class="settings-section"><label><input type="radio" name="type" checked value="lines"/><span>Contour lines</span></label></div>
+            <div class="settings-section"><label><input type="radio" name="type" value="illuminated"/><span>Illuminated contour polygons</span></label></div>
+          </div>
         </div>
         <div class='settings-row unit'>
-          <p class="settings-title inline">Contour Interval</p>
-          <div class="settings-section">
-            <input type="text" value="500" id="interval-input"/>
-            <label><input type="radio" name="unit" value="m"/><span>m</span></label>
-            <label><input type="radio" name="unit" checked value="ft"/><span>ft</span></label>
-          </div>
-          <div class="settings-section">
-            <label>Major interval: </label>
-            <select id="major">
-              <option value="0">None</option>
-              <option value="2"></option>
-              <option value="5"></option>
-              <option value="10"></option>
-            </select>
+          <p class="settings-title">Contour Interval</p>
+            <div class="settings-content">
+            <div class="settings-section">
+              <input type="text" value="500" id="interval-input"/>
+              <label><input type="radio" name="unit" value="m"/><span>meters</span></label>
+              <label><input type="radio" name="unit" checked value="ft"/><span>feet</span></label>
+            </div>
+            <div class="settings-section">
+              <label>Major interval: </label>
+              <select id="major">
+                <option value="0">None</option>
+                <option value="2"></option>
+                <option value="5"></option>
+                <option value="10"></option>
+              </select>
+            </div>
           </div>
         </div>
         <div class='settings-row'>
-          <p class="settings-title inline">Contour Style</p>
-          <div id="lines-style">
-            <div class="settings-section"><label>Contour color: <input id="line-color" type="color" value ="#8c7556"/></label></div>
-            <div class="settings-section"><label>Line weight: <input id="line-width" type="text" value="0.75"/></label> pixels</div>
-            <div class="settings-section"><label>Major line weight: <input id="line-width-major" type="text" value="1.5"/></label> pixels</div>
-          </div>
-          <div id="illuminated-style" style="display: none">
-            <div class="settings-section"><label>Highlight color: <input id="highlight-color" type="color" value ="#B1AEA4"/></label></div>
-            <div class="settings-section"><label>Shadow color: <input id="shadow-color" type="color" value ="#5b5143"/></label></div>
-            <div class="settings-section"><label>Width: <input id="shadow-width" type="text" value="2"/></label> pixels</div>
+          <p class="settings-title">Contour Style</p>
+            <div class="settings-content">
+            <div id="lines-style">
+              <div class="settings-section"><label>Contour color: <input id="line-color" type="color" value ="#8c7556"/></label></div>
+              <div class="settings-section"><label>Line weight: <input id="line-width" type="text" value="0.75"/></label> pixels</div>
+              <div class="settings-section"><label>Major line weight: <input id="line-width-major" type="text" value="1.5"/></label> pixels</div>
+            </div>
+            <div id="illuminated-style" style="display: none">
+              <div class="settings-section"><label>Highlight color: <input id="highlight-color" type="color" value ="#B1AEA4"/></label></div>
+              <div class="settings-section"><label>Shadow color: <input id="shadow-color" type="color" value ="#5b5143"/></label></div>
+              <div class="settings-section"><label>Width: <input id="shadow-width" type="text" value="2"/></label> pixels</div>
+            </div>
           </div>
         </div>
-        <div class='settings-row inline'>
+        <div class='settings-row'>
           <p class="settings-title">Background style</p>
-          <label><input type="radio" name="bg" checked value="none" id="no-bg"/><span>None</span></label><br>
-          <label><input type="radio" name="bg" value="solid" id="solid-bg"/><span>Solid color</span></label>
-          <div id="solid-style" class="disabled">
-            <input id="solid-color" type="color" value ="#fffcfa"/></label>
-          </div><br>
-          <label><input type="radio" name="bg" value="hypso"/><span>Hypsometric tints</span></label>
-          <div id="hypso-style" class="disabled">
-            <div class="settings-section"><label>Low: <input id="hypso-low-color" type="color" value ="#486341"/></label></div>
-            <div class="settings-section"><label>High: <input id="hypso-high-color" type="color" value ="#e5d9c9"/></label></div>
+          <div class="settings-content">
+            <div class="settings-section">
+              <label><input type="radio" name="bg" checked value="none" id="no-bg"/><span>None</span></label>
+            </div>
+            <div class="settings-section">
+              <label><input type="radio" name="bg" value="solid" id="solid-bg"/><span>Solid color</span></label>
+              <div id="solid-style" class="disabled">
+                <input id="solid-color" type="color" value ="#fffcfa"/></label>
+              </div>
+            </div>
+            <div class="settings-section">
+              <label><input type="radio" name="bg" value="hypso"/><span>Hypsometric tints</span></label>
+              <div id="hypso-style" class="disabled">
+                <label>Low: <input id="hypso-low-color" type="color" value ="#486341"/></label>
+                <br>
+                <label>High: <input id="hypso-high-color" type="color" value ="#e5d9c9"/></label>
+              </div>
+            </div>
           </div>
         </div>
         <div class='settings-row inline' id="bathymetry">
           <p class="settings-title">Bathymetry (colors below sea level)</p>
-          <label><input type="radio" name="bathy" checked value="none" id="no-bathy"/><span>None</span></label><br>
-          <label><input type="radio" name="bathy" value="solid" id="solid-bathy"/><span>Solid color</span></label>
-          <div id="solid-bathy-style" class="disabled">
-            <input id="solid-bathy-color" type="color" value ="#d5f2ff"/></label>
-          </div><br>
-          <label><input type="radio" name="bathy" value="bathy"/><span>Bathymetric tints</span></label>
-          <div id="bathy-style" class="disabled">
-            <div class="settings-section"><label>Low: <input id="bathy-low-color" type="color" value ="#315d9b"/></label></div>
-            <div class="settings-section"><label>Sea level: <input id="bathy-high-color" type="color" value ="#d5f2ff"/></label></div>
+          <div class="settings-content">
+            <div class="settings-section">
+              <label><input type="radio" name="bathy" checked value="none" id="no-bathy"/><span>None</span></label>
+            </div>
+            <div class="settings-section">
+              <label><input type="radio" name="bathy" value="solid" id="solid-bathy"/><span>Solid color</span></label>
+              <div id="solid-bathy-style" class="disabled">
+                <input id="solid-bathy-color" type="color" value ="#d5f2ff"/></label>
+              </div>
+            </div>
+            <div class="settings-section">
+              <label><input type="radio" name="bathy" value="bathy"/><span>Bathymetric tints</span></label>
+              <div id="bathy-style" class="disabled">
+                <div class="settings-section"><label>Low: <input id="bathy-low-color" type="color" value ="#315d9b"/></label></div>
+                <div class="settings-section"><label>Sea level: <input id="bathy-high-color" type="color" value ="#d5f2ff"/></label></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
