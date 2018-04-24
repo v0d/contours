@@ -142,12 +142,20 @@ d3.select('#shadow-width').on('keyup', function () {
 
 d3.select('#settings-toggle').on('click', function () {
   d3.select('#settings').classed('show', !d3.select('#settings').classed('show'));
-  d3.select('#download').classed('show', false);
+  d3.select(this).classed('show', !d3.select(this).classed('show'));
+  if (d3.select('#settings').classed('show')) {
+    d3.selectAll('#download, #download-toggle').classed('show', false);
+  }
+  d3.select('#wrapper').classed('panel-open', d3.select('#settings').classed('show') || d3.select('#download').classed('show'));
 });
 
 d3.select('#download-toggle').on('click', function () {
   d3.select('#download').classed('show', !d3.select('#download').classed('show'));
-  d3.select('#settings').classed('show', false);
+  d3.select(this).classed('show', !d3.select(this).classed('show'));
+  if (d3.select('#download').classed('show')) {
+    d3.selectAll('#settings, #settings-toggle').classed('show', false);
+  }
+  d3.select('#wrapper').classed('panel-open', d3.select('#settings').classed('show') || d3.select('#download').classed('show'));
 });
 
 d3.selectAll('input[name="bg"]').on('change', function () {
@@ -237,8 +245,9 @@ d3.selectAll('#download-png, .settings-row.png .settings-title').on('click', dow
 d3.selectAll('#download-svg, .settings-row.svg .settings-title').on('click', downloadSVG);
 
 d3.selectAll('.icon-cancel').on('click', function () {
-  d3.select(this.parentNode).classed('show', false);
-})
+  d3.selectAll('.show').classed('show', false);
+  d3.select('#wrapper').classed('panel-open', false);
+});
 
 var searchtimer;
 d3.select('#search input').on('keyup', function () {
