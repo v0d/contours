@@ -240,9 +240,9 @@ d3.select('input[type="checkbox"]').on('change', function () {
   else referenceLayer.setOpacity(0);
 });
 
-d3.selectAll('#download-geojson, .settings-row.geojson .settings-title').on('click', downloadGeoJson);
-d3.selectAll('#download-png, .settings-row.png .settings-title').on('click', downloadPNG);
-d3.selectAll('#download-svg, .settings-row.svg .settings-title').on('click', downloadSVG);
+d3.select('#download-geojson').on('click', downloadGeoJson);
+d3.select('#download-png').on('click', downloadPNG);
+d3.select('#download-svg').on('click', downloadSVG);
 
 d3.selectAll('.icon-cancel').on('click', function () {
   d3.selectAll('.show').classed('show', false);
@@ -443,7 +443,7 @@ function getContours () {
       return +this.value * interval;
     });
 
-  d3.select('#bathymetry').style('display', min < 0 ? 'inline-block' : 'none');
+  d3.select('#bathymetry').style('display', min < 0 ? 'block' : 'none');
   if (min < 0) {
     bathyColor.domain([min, -1]);
     if (bathyColorType != 'none') {
