@@ -496,11 +496,11 @@ function drawContours(svg) {
         contoursGeoData.forEach(function (c) {
           if (majorInterval == 0 || c.value % majorInterval != 0) path(c);
         });
-        contourContext.stroke();
         if (colorType == 'solid') {
           contourContext.fillStyle = solidColor;
           contourContext.fill();
         }
+        contourContext.stroke();
       } else {
         contoursGeoData.forEach(function (c) {
           contourContext.beginPath();
