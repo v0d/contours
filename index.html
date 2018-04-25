@@ -1,5 +1,6 @@
 <html>
 <head>
+  <link href="https://fonts.googleapis.com/css?family=Noto+Sans:400,400i,700" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
   <link rel="stylesheet" href="css/fontello.css" />
@@ -20,7 +21,7 @@
   <style>
     html, body { 
       margin: 0;
-      font-family: Helvetica, Arial, sans-serif;
+      font-family: 'Noto Sans', Helvetica, Arial, sans-serif;
       font-size: 14px;
       color: #111;
     }
@@ -140,7 +141,7 @@
       margin: 20px 0 10px 20px;
       display: block;
     }
-    label.bg {
+    label.bg, label.type {
       display: block;
       margin-bottom: 20px;
     }
@@ -165,8 +166,8 @@
       padding: 5px;
       border-radius: 5px;
       min-width: 20px;
-      text-align: center;
       display: inline-block;
+      width: calc(100% - 10px);
     }
     input[type="radio"] + span:hover{
       background-color: #f7f7f7;
@@ -176,6 +177,10 @@
       font-weight: bold;
       background-color: #58A2D8;
       color: white;
+    }
+    input[type="radio"][name="unit"] + span{
+      width: auto;
+      text-align: center;
     }
     #settings input[type="text"] {
       width: 40px;
@@ -334,8 +339,8 @@
         <div class='settings-row type'>
           <p class="settings-title inline">Map Type</p>
             <div class="settings-content">
-            <div class="settings-section"><label><input type="radio" name="type" checked value="lines"/><span>Contour lines</span></label></div>
-            <div class="settings-section"><label><input type="radio" name="type" value="illuminated"/><span>Illuminated contour polygons</span></label></div>
+            <label class="type"><input type="radio" name="type" checked value="lines"/><span>Contour lines</span></label>
+            <label class="type"><input type="radio" name="type" value="illuminated"/><span>Illuminated contour polygons</span></label>
           </div>
         </div>
         <div class='settings-row unit'>
