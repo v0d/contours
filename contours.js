@@ -142,12 +142,20 @@ d3.select('#shadow-width').on('keyup', function () {
 
 d3.select('#settings-toggle').on('click', function () {
   d3.select('#settings').classed('show', !d3.select('#settings').classed('show'));
-  d3.select('#download').classed('show', false);
+  d3.select(this).classed('show', !d3.select(this).classed('show'));
+  if (d3.select('#settings').classed('show')) {
+    d3.selectAll('#download, #download-toggle').classed('show', false);
+  }
+  d3.select('#wrapper').classed('panel-open', d3.select('#settings').classed('show') || d3.select('#download').classed('show'));
 });
 
 d3.select('#download-toggle').on('click', function () {
   d3.select('#download').classed('show', !d3.select('#download').classed('show'));
-  d3.select('#settings').classed('show', false);
+  d3.select(this).classed('show', !d3.select(this).classed('show'));
+  if (d3.select('#download').classed('show')) {
+    d3.selectAll('#settings, #settings-toggle').classed('show', false);
+  }
+  d3.select('#wrapper').classed('panel-open', d3.select('#settings').classed('show') || d3.select('#download').classed('show'));
 });
 
 d3.selectAll('input[name="bg"]').on('change', function () {
@@ -232,13 +240,14 @@ d3.select('input[type="checkbox"]').on('change', function () {
   else referenceLayer.setOpacity(0);
 });
 
-d3.selectAll('#download-geojson, .settings-row.geojson .settings-title').on('click', downloadGeoJson);
-d3.selectAll('#download-png, .settings-row.png .settings-title').on('click', downloadPNG);
-d3.selectAll('#download-svg, .settings-row.svg .settings-title').on('click', downloadSVG);
+d3.select('#download-geojson').on('click', downloadGeoJson);
+d3.select('#download-png').on('click', downloadPNG);
+d3.select('#download-svg').on('click', downloadSVG);
 
 d3.selectAll('.icon-cancel').on('click', function () {
-  d3.select(this.parentNode).classed('show', false);
-})
+  d3.selectAll('.show').classed('show', false);
+  d3.select('#wrapper').classed('panel-open', false);
+});
 
 var searchtimer;
 d3.select('#search input').on('keyup', function () {
@@ -443,7 +452,7 @@ function getContours () {
       return +this.value * interval;
     });
 
-  d3.select('#bathymetry').style('display', min < 0 ? 'inline-block' : 'none');
+  d3.select('#bathymetry').style('display', min < 0 ? 'block' : 'none');
   if (min < 0) {
     bathyColor.domain([min, -1]);
     if (bathyColorType != 'none') {
@@ -497,11 +506,11 @@ function drawContours(svg) {
         contoursGeoData.forEach(function (c) {
           if (majorInterval == 0 || c.value % majorInterval != 0) path(c);
         });
-        contourContext.stroke();
         if (colorType == 'solid') {
           contourContext.fillStyle = solidColor;
           contourContext.fill();
         }
+        contourContext.stroke();
       } else {
         contoursGeoData.forEach(function (c) {
           contourContext.beginPath();
