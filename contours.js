@@ -463,11 +463,10 @@ function getContours () {
   majorInterval = +d3.select('#major').node().value * interval;
 
   drawContours();
-  d3.select('#loading').style('display', 'none');
 }
 
 function drawContours(svg) {
-  if (!svg) {
+  if (svg !== true) {
     contourContext.clearRect(0,0,width,height);
     contourContext.save();
     if (type == 'illuminated') {
@@ -576,6 +575,7 @@ function drawContours(svg) {
         return 'elev-' + d.value;
       });
   }
+  d3.select('#loading').style('display', 'none');
 }
 
 function downloadGeoJson () {
