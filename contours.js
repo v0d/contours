@@ -80,64 +80,64 @@ d3.selectAll('.settings-row.type input').on('change', function () {
   d3.select('#major').attr('disabled', type =='illuminated' ? 'disabled' : null);
   d3.select('#lines-style').style('display', type =='illuminated' ? 'none' : 'inline-block');
   d3.select('#illuminated-style').style('display', type =='illuminated' ? 'inline-block' : 'none');
-  drawContours();
+  load(drawContours);
 });
 
 d3.select('#interval-input').on('keyup', function () {
   if (+this.value == interval) return;
   clearTimeout(wait);
-  wait = setTimeout(getContours,500);
+  wait = setTimeout(function () { load(getContours) },500);
 });
 
 d3.selectAll('input[name="unit"]').on('change', function () {
   if (this.checked) unit = this.value;
-  getContours();
+  load(getContours);
 })
 
 d3.select('#major').on('change', function () {
   majorInterval = +this.value * interval;
   d3.select('#line-width-major').attr('disabled', majorInterval == 0 ? 'disabled' : null)
-  drawContours();
+  load(drawContours);
 });
 
 d3.select('#line-width-major').on('keyup', function () {
   if (isNaN(this.value) || +this.value < 0) this.value = 1.5;
   lineWidthMajor = +this.value;
   clearTimeout(wait);
-  wait = setTimeout(drawContours,500);
+  wait = setTimeout(function () { load(drawContours) },500);
 });
 
 d3.select('#line-width').on('keyup', function () {
   if (isNaN(this.value) || +this.value < 0) this.value = .75;
   lineWidth = +this.value;
   clearTimeout(wait);
-  wait = setTimeout(drawContours,500);
+  wait = setTimeout(function () { load(drawContours) },500);
 });
 
 d3.select('#line-color').on('change', function () {
   lineColor = this.value;
   clearTimeout(wait);
-  wait = setTimeout(drawContours,500);
+  wait = setTimeout(function () { load(drawContours) },500);
 });
 
 d3.select('#highlight-color').on('change', function () {
   var rgba = toRGBA(this.value);
   highlightColor = rgba.slice(0, rgba.lastIndexOf(',')) + ',.5)';
   clearTimeout(wait);
-  wait = setTimeout(drawContours,500);
+  wait = setTimeout(function () { load(drawContours) },500);
 });
 
 d3.select('#shadow-color').on('change', function () {
   shadowColor = this.value;
   clearTimeout(wait);
-  wait = setTimeout(drawContours,500);
+  wait = setTimeout(function () { load(drawContours) },500);
 });
 
 d3.select('#shadow-width').on('keyup', function () {
   if (isNaN(this.value) || +this.value < 0) this.value = 2;
   shadowSize = +this.value;
   clearTimeout(wait);
-  wait = setTimeout(drawContours,500);
+  wait = setTimeout(function () { load(drawContours) },500);
 });
 
 d3.select('#settings-toggle').on('click', function () {
@@ -166,25 +166,25 @@ d3.selectAll('input[name="bg"]').on('change', function () {
   }
   d3.selectAll('#solid-style input, #hypso-style input').attr('disabled', null);
   d3.selectAll('.disabled input').attr('disabled', 'disabled');
-  drawContours();
+  load(drawContours);
 })
 
 d3.select('#solid-color').on('change', function () {
   solidColor = this.value;
   clearTimeout(wait);
-  wait = setTimeout(drawContours,500);
+  wait = setTimeout(function () { load(drawContours) },500);
 });
 
 d3.select('#hypso-low-color').on('change', function () {
   hypsoColor.range([this.value, hypsoColor.range()[1]]);
   clearTimeout(wait);
-  wait = setTimeout(drawContours,500);
+  wait = setTimeout(function () { load(drawContours) },500);
 });
 
 d3.select('#hypso-high-color').on('change', function () {
   hypsoColor.range([hypsoColor.range()[0], this.value]);
   clearTimeout(wait);
-  wait = setTimeout(drawContours,500);
+  wait = setTimeout(function () { load(drawContours) },500);
 });
 
 d3.selectAll('input[name="bathy"]').on('change', function () {
@@ -206,25 +206,25 @@ d3.selectAll('input[name="bathy"]').on('change', function () {
   }
   d3.selectAll('#solid-bathy-style input, #bathy-style input').attr('disabled', null);
   d3.selectAll('.disabled input').attr('disabled', 'disabled');
-  drawContours();
+  load(drawContours);
 })
 
 d3.select('#solid-bathy-color').on('change', function () {
   oceanColor = this.value;
   clearTimeout(wait);
-  wait = setTimeout(drawContours,500);
+  wait = setTimeout(function () { load(drawContours) },500);
 });
 
 d3.select('#bathy-low-color').on('change', function () {
   bathyColor.range([this.value, bathyColor.range()[1]]);
   clearTimeout(wait);
-  wait = setTimeout(drawContours,500);
+  wait = setTimeout(function () { load(drawContours) },500);
 });
 
 d3.select('#bathy-high-color').on('change', function () {
   bathyColor.range([bathyColor.range()[0], this.value]);
   clearTimeout(wait);
-  wait = setTimeout(drawContours,500);
+  wait = setTimeout(function () { load(drawContours) },500);
 });
 
 d3.select('input[type="checkbox"]').on('change', function () {
@@ -328,7 +328,7 @@ map.setView(map_start_location.slice(0, 3), map_start_location[2]);
 
 map.on('moveend', function() {
   // on move end we redraw the flow layer, so clear some stuff
- 
+
   contourContext.clearRect(0,0,width,height);
   clearTimeout(wait);
   wait = setTimeout(getRelief,500);  // redraw after a delay in case map is moved again soon after
@@ -375,20 +375,29 @@ function reverseTransform() {
   L.DomUtil.setPosition(contourCanvas, top_left);
 };
 
+function load (fn) {
+  requestAnimationFrame(function () {
+    d3.select('#loading').style('display', 'flex');
+    requestAnimationFrame(fn);
+  });
+}
+
 function getRelief(){
-  // reset canvases
-  demContext.clearRect(0,0,width,height);
-  reverseTransform();
+  load(function() {
+    // reset canvases
+    demContext.clearRect(0,0,width,height);
+    reverseTransform();
 
-  // reset DEM data by drawing elevation tiles to it
-  for (var t in demLayer._tiles) {
-    var rect = demLayer._tiles[t].el.getBoundingClientRect();
-    demContext.drawImage(demLayer._tiles[t].el.img,rect.left + buffer,rect.top + buffer);
-  }
-  demImageData = demContext.getImageData(0,0,width,height);
-  demData = demImageData.data;
+    // reset DEM data by drawing elevation tiles to it
+    for (var t in demLayer._tiles) {
+      var rect = demLayer._tiles[t].el.getBoundingClientRect();
+      demContext.drawImage(demLayer._tiles[t].el.img,rect.left + buffer,rect.top + buffer);
+    }
+    demImageData = demContext.getImageData(0,0,width,height);
+    demData = demImageData.data;
 
-  getContours();
+    getContours();
+  });
 }
 
 function getContours () {
@@ -445,6 +454,7 @@ function getContours () {
   majorInterval = +d3.select('#major').node().value * interval;
 
   drawContours();
+  d3.select('#loading').style('display', 'none');
 }
 
 function drawContours(svg) {
