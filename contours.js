@@ -235,6 +235,58 @@ d3.select('#bathy-high-color').on('change', function () {
   wait = setTimeout(function () { load(drawContours) },500);
 });
 
+d3.selectAll('input[type="color"]').on('change.updatetext', function () {
+  d3.select('#' + this.id + '-text').node().value = toHex(this.value);
+});
+
+d3.selectAll('.color-input').on('change', function () {
+  var validColor = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(this.value);
+  if (!validColor) return;
+  switch (this.id) {
+    case 'line-color-text':
+    lineColor = this.value;
+    break;
+
+    case 'highlight-color-text':
+    var rgba = toRGBA(this.value);
+    highlightColor = rgba.slice(0, rgba.lastIndexOf(',')) + ',.5)';
+    break;
+
+    case 'shadow-color-text':
+    shadowColor = this.value;
+    break;
+
+    case 'solid-color-text':
+    solidColor = this.value;
+    break;
+
+    case 'hypso-low-color-text':
+    hypsoColor.range([this.value, hypsoColor.range()[1]]);
+    break;
+
+    case 'hypso-high-color-text':
+    hypsoColor.range([hypsoColor.range()[0], this.value]);
+    break;
+
+    case 'solid-bathy-color-text':
+    oceanColor = this.value;
+    break;
+
+    case 'bathy-low-color-text':
+    bathyColor.range([this.value, bathyColor.range()[1]]);
+    break;
+
+    case 'bathy-high-color-text':
+    bathyColor.range([bathyColor.range()[0], this.value]);
+    break;
+  }
+
+  d3.select('#' + this.id.replace('-text','')).node().value = toHex(this.value);
+
+  clearTimeout(wait);
+  wait = setTimeout(function () { load(drawContours) },500);
+})
+
 d3.select('input[type="checkbox"]').on('change', function () {
   if (this.checked) referenceLayer.setOpacity(1);
   else referenceLayer.setOpacity(0);
@@ -683,4 +735,19 @@ function toRGBA (color) {
 function hexToRGBA (hex) {
   var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result ? 'rgba(' + parseInt(result[1], 16) + ',' + parseInt(result[2], 16) + ',' + parseInt(result[3], 16) + ',1)' : null;
+}
+
+function toHex (rgba) {
+  if (rgba[0] == '#') {
+    var vals = rgba.slice(1);
+    if (vals.length == 3) {
+      return '#' + vals[0] + vals[0] + vals[1] + vals[1] + vals[2] + vals[2];
+    }
+    return rgba;
+  }
+  var numbers = rgba.substr(rgba.indexOf('(') + 1, rgba.indexOf(')')).split(',').map(function (n) { return parseInt(n); });
+  var r = numbers[0];
+  var g = numbers[1];
+  var b = numbers[2];
+  return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
