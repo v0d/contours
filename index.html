@@ -123,6 +123,11 @@
     }
     .settings-section {
       margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+    }
+    .settings-section > span {
+      flex-grow: 1;
     }
     .settings-content {
       padding-left: 20px;
@@ -134,6 +139,11 @@
       margin: 20px 0 10px 20px;
       display: block;
     }
+    label.bg {
+      display: block;
+      margin-bottom: 20px;
+    }
+
     input[type="color"], div.row-icon {
       margin-right: 20px;
       width: 45px;
@@ -175,7 +185,6 @@
     }
     #settings input[type="text"].color-input {
       width: 80px;
-      float: right;
     }
     #settings input#interval-input {
       width: 50px;
@@ -325,14 +334,15 @@
           <p class="settings-title">Contour Interval</p>
             <div class="settings-content">
             <div class="settings-section">
-              <div class="row-icon"></div>
+              <div class="row-icon"><img src="img/icon_contours.png"/></div>
               <input type="text" value="500" id="interval-input"/>
+              <span></span>
               <label><input type="radio" name="unit" value="m"/><span>meters</span></label>
               <label><input type="radio" name="unit" checked value="ft"/><span>feet</span></label>
             </div>
             <div class="settings-section">
-              <div class="row-icon"></div>
-              <label>Major interval </label>
+              <div class="row-icon"><img src="img/icon_major.png"/></div>
+              <span>Major interval</span>
               <select id="major">
                 <option value="0">None</option>
                 <option value="2"></option>
@@ -346,38 +356,32 @@
           <p class="settings-title">Contour Style</p>
             <div class="settings-content">
             <div id="lines-style">
-              <div class="settings-section"><input id="line-color" type="color" value ="#8c7556"/><label>Contour color <input class="color-input" id="line-color-text" type="text" value ="#8c7556"/></label></div>
-              <div class="settings-section"><div class="row-icon"></div><label>Line weight <input id="line-width" type="text" value="0.75"/></label> px</div>
-              <div class="settings-section"><div class="row-icon"></div><label>Major line weight <input id="line-width-major" type="text" value="1.5"/></label> px</div>
+              <div class="settings-section"><input id="line-color" type="color" value ="#8c7556"/><span>Contour color</span><label><input class="color-input" id="line-color-text" type="text" value ="#8c7556"/></label></div>
+              <div class="settings-section"><div class="row-icon"><img src="img/icon_weight.png"/></div><span>Line weight</span><label><input id="line-width" type="text" value="0.75"/> px</label></div>
+              <div class="settings-section"><div class="row-icon"><img src="img/icon_weight_major.png"/></div><span>Major line weight</span><label><input id="line-width-major" type="text" value="1.5"/> px</label></div>
             </div>
             <div id="illuminated-style" style="display: none">
-              <div class="settings-section"><input id="highlight-color" type="color" value ="#B1AEA4"/><label>Highlight color <input class="color-input" id="highlight-color-text" type="text" value ="#B1AEA4"/></label></div>
-              <div class="settings-section"><input id="shadow-color" type="color" value ="#5b5143"/><label>Shadow color <input class="color-input" id="shadow-color-text" type="text" value ="#5b5143"/></label></div>
-              <div class="settings-section"><div class="row-icon"></div><label>Width <input id="shadow-width" type="text" value="2"/></label> px</div>
+              <div class="settings-section"><input id="highlight-color" type="color" value ="#B1AEA4"/><span>Highlight color</span><label><input class="color-input" id="highlight-color-text" type="text" value ="#B1AEA4"/></label></div>
+              <div class="settings-section"><input id="shadow-color" type="color" value ="#5b5143"/><span>Shadow color</span><label><input class="color-input" id="shadow-color-text" type="text" value ="#5b5143"/></label></div>
+              <div class="settings-section"><div class="row-icon"><img src="img/icon_weight.png"/></div><span>Width</span><label><input id="shadow-width" type="text" value="2"/> px</label></div>
             </div>
           </div>
         </div>
         <div class='settings-row'>
           <p class="settings-title">Background style</p>
           <div class="settings-content">
-            <div class="settings-section">
-              <label><input type="radio" name="bg" checked value="none" id="no-bg"/><span>None</span></label>
+            <label class="bg"><input type="radio" name="bg" checked value="none" id="no-bg"/><span>None</span></label>
+            <label class="bg"><input type="radio" name="bg" value="solid" id="solid-bg"/><span>Solid color</span></label>
+            <div id="solid-style" class="settings-section disabled color-section">
+              <input id="solid-color" type="color" value ="#fffcfa"/><span>Fill color</span><label><input class="color-input" id="solid-color-text" type="text" value ="#fffcfa"/></label>
             </div>
-            <div class="settings-section">
-              <label><input type="radio" name="bg" value="solid" id="solid-bg"/><span>Solid color</span></label>
-              <div id="solid-style" class="disabled color-section">
-                <input id="solid-color" type="color" value ="#fffcfa"/><label>Fill color <input class="color-input" id="solid-color-text" type="text" value ="#fffcfa"/></label>
+            <label class="bg"><input type="radio" name="bg" value="hypso"/><span>Hypsometric tints</span></label>
+            <div id="hypso-style" class="disabled">
+              <div class="settings-section color-section">
+                <input id="hypso-low-color" type="color" value ="#486341"/><span>Low color</span><label><input class="color-input" id="low-color-text" type="text" value ="#486341"/></label>
               </div>
-            </div>
-            <div class="settings-section">
-              <label><input type="radio" name="bg" value="hypso"/><span>Hypsometric tints</span></label>
-              <div id="hypso-style" class="disabled">
-                <div class="color-section">
-                  <input id="hypso-low-color" type="color" value ="#486341"/><label>Low color <input class="color-input" id="low-color-text" type="text" value ="#486341"/></label>
-                </div>
-                <div class="color-section">
-                  <input id="hypso-high-color" type="color" value ="#e5d9c9"/><label>High color <input class="color-input" id="high-color-text" type="text" value ="#e5d9c9"/></label>
-                </div>
+              <div class="settings-section color-section">
+                <input id="hypso-high-color" type="color" value ="#e5d9c9"/><span>High color</span><label><input class="color-input" id="high-color-text" type="text" value ="#e5d9c9"/></label>
               </div>
             </div>
           </div>
@@ -386,24 +390,18 @@
         <div class='settings-row inline' id="bathymetry">
           <p class="settings-title">Bathymetry</p>
           <div class="settings-content">
-            <div class="settings-section">
-              <label><input type="radio" name="bathy" checked value="none" id="no-bathy"/><span>None</span></label>
+            <label class="bg"><input type="radio" name="bathy" checked value="none" id="no-bathy"/><span>None</span></label>
+            <label class="bg"><input type="radio" name="bathy" value="solid" id="solid-bathy"/><span>Solid color</span></label>
+            <div id="solid-bathy-style" class="settings-section disabled color-section">
+              <input id="solid-bathy-color" type="color" value ="#d5f2ff"/><label>Fill color <input class="color-input" id="solid-bathy-color-text" type="text" value ="#d5f2ff"/></label>
             </div>
-            <div class="settings-section">
-              <label><input type="radio" name="bathy" value="solid" id="solid-bathy"/><span>Solid color</span></label>
-              <div id="solid-bathy-style" class="disabled color-section">
-                <input id="solid-bathy-color" type="color" value ="#d5f2ff"/><label>Fill color <input class="color-input" id="solid-bathy-color-text" type="text" value ="#d5f2ff"/></label>
+            <label class="bg"><input type="radio" name="bathy" value="bathy"/><span>Bathymetric tints</span></label>
+            <div id="bathy-style" class="disabled">
+              <div class="color-section settings-section">
+                <input id="bathy-low-color" type="color" value ="#315d9b"/><span>Low color</span><label><input class="color-input" id="bathy-low-color-text" type="text" value ="#315d9b"/></label>
               </div>
-            </div>
-            <div class="settings-section">
-              <label><input type="radio" name="bathy" value="bathy"/><span>Bathymetric tints</span></label>
-              <div id="bathy-style" class="disabled">
-                <div class="color-section">
-                  <input id="bathy-low-color" type="color" value ="#315d9b"/><label>Low color <input class="color-input" id="bathy-low-color-text" type="text" value ="#315d9b"/></label>
-                </div>
-                <div class="color-section">
-                  <input id="bathy-high-color" type="color" value ="#d5f2ff"/><label>High color <input class="color-input" id="bathy-high-color-text" type="text" value ="#d5f2ff"/></label>
-                </div>
+              <div class="color-section settings-section">
+                <input id="bathy-high-color" type="color" value ="#d5f2ff"/><span>High color</span><label><input class="color-input" id="bathy-high-color-text" type="text" value ="#d5f2ff"/></label>
               </div>
             </div>
           </div>

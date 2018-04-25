@@ -78,8 +78,8 @@ window.onresize = function () {
 d3.selectAll('.settings-row.type input').on('change', function () {
   type = d3.select('.settings-row.type input:checked').node().value;
   d3.select('#major').attr('disabled', type =='illuminated' ? 'disabled' : null);
-  d3.select('#lines-style').style('display', type =='illuminated' ? 'none' : 'inline-block');
-  d3.select('#illuminated-style').style('display', type =='illuminated' ? 'inline-block' : 'none');
+  d3.select('#lines-style').style('display', type =='illuminated' ? 'none' : 'block');
+  d3.select('#illuminated-style').style('display', type =='illuminated' ? 'block' : 'none');
   load(drawContours);
 });
 
