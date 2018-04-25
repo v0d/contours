@@ -115,20 +115,20 @@ d3.select('#line-width').on('keyup', function () {
 });
 
 d3.select('#line-color').on('change', function () {
-  lineColor = this.value;
+  lineColor = d3.event.detail;
   clearTimeout(wait);
   wait = setTimeout(function () { load(drawContours) },500);
 });
 
 d3.select('#highlight-color').on('change', function () {
-  var rgba = toRGBA(this.value);
+  var rgba = toRGBA(d3.event.detail);
   highlightColor = rgba.slice(0, rgba.lastIndexOf(',')) + ',.5)';
   clearTimeout(wait);
   wait = setTimeout(function () { load(drawContours) },500);
 });
 
 d3.select('#shadow-color').on('change', function () {
-  shadowColor = this.value;
+  shadowColor = d3.event.detail;
   clearTimeout(wait);
   wait = setTimeout(function () { load(drawContours) },500);
 });
@@ -178,19 +178,19 @@ d3.selectAll('input[name="bg"]').on('change', function () {
 })
 
 d3.select('#solid-color').on('change', function () {
-  solidColor = this.value;
+  solidColor = d3.event.detail;
   clearTimeout(wait);
   wait = setTimeout(function () { load(drawContours) },500);
 });
 
 d3.select('#hypso-low-color').on('change', function () {
-  hypsoColor.range([this.value, hypsoColor.range()[1]]);
+  hypsoColor.range([d3.event.detail, hypsoColor.range()[1]]);
   clearTimeout(wait);
   wait = setTimeout(function () { load(drawContours) },500);
 });
 
 d3.select('#hypso-high-color').on('change', function () {
-  hypsoColor.range([hypsoColor.range()[0], this.value]);
+  hypsoColor.range([hypsoColor.range()[0], d3.event.detail]);
   clearTimeout(wait);
   wait = setTimeout(function () { load(drawContours) },500);
 });
@@ -218,25 +218,38 @@ d3.selectAll('input[name="bathy"]').on('change', function () {
 })
 
 d3.select('#solid-bathy-color').on('change', function () {
-  oceanColor = this.value;
+  oceanColor = d3.event.detail;
   clearTimeout(wait);
   wait = setTimeout(function () { load(drawContours) },500);
 });
 
 d3.select('#bathy-low-color').on('change', function () {
-  bathyColor.range([this.value, bathyColor.range()[1]]);
+  bathyColor.range([d3.event.detail, bathyColor.range()[1]]);
   clearTimeout(wait);
   wait = setTimeout(function () { load(drawContours) },500);
 });
 
 d3.select('#bathy-high-color').on('change', function () {
-  bathyColor.range([bathyColor.range()[0], this.value]);
+  bathyColor.range([bathyColor.range()[0], d3.event.detail]);
   clearTimeout(wait);
   wait = setTimeout(function () { load(drawContours) },500);
 });
 
-d3.selectAll('input[type="color"]').on('change.updatetext', function () {
-  d3.select('#' + this.id + '-text').node().value = toHex(this.value);
+d3.selectAll('button[type="color"]').each(function() {
+  //d3.select('#' + this.id + '-text').node().value = toHex(this.value);
+  var val = this.getAttribute('value');
+  var el = this;
+  var picker = new jscolor(this, {
+    value: val,
+    valueElement: null,
+    closable: true,
+    onFineChange: function () {
+      var event = new CustomEvent('change', { detail: '#' + picker.toString() });
+      el.dispatchEvent(event);
+      d3.select('#' + el.id + '-text').node().value = toHex('#' + picker.toString());
+    }
+  });
+  this.picker = picker;
 });
 
 d3.selectAll('.color-input').on('change', function () {
@@ -281,7 +294,7 @@ d3.selectAll('.color-input').on('change', function () {
     break;
   }
 
-  d3.select('#' + this.id.replace('-text','')).node().value = toHex(this.value);
+  d3.select('#' + this.id.replace('-text','')).node().picker.fromString(toHex(this.value));
 
   clearTimeout(wait);
   wait = setTimeout(function () { load(drawContours) },500);
@@ -340,7 +353,6 @@ function search (val) {
         .classed('highlight', function (d,i) { return i == 0})
         .html(function (d) { return d.place_name })
         .on('click', function (d) {
-          console.log(d)
           if (d.bbox) map.fitBounds([[d.bbox[1], d.bbox[0]], [d.bbox[3], d.bbox[2]]]);
           else {
             map.setView(d.center.concat().reverse(), 11)
