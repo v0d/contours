@@ -296,7 +296,7 @@ d3.select('#download-geojson').on('click', downloadGeoJson);
 d3.select('#download-png').on('click', downloadPNG);
 d3.select('#download-svg').on('click', downloadSVG);
 
-d3.selectAll('.icon-cancel').on('click', function () {
+d3.selectAll('.icon-left-open').on('click', function () {
   d3.selectAll('.show').classed('show', false);
   d3.select('#wrapper').classed('panel-open', false);
 });
