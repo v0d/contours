@@ -1,8 +1,8 @@
-// canvas on which all the flowing lines will be drawn, and some convenience variables
+// canvas on which the contours will be drawn
 var contourCanvas = document.createElement('canvas');
 contourCanvas.id='contours';
 var contourContext;
-var buffer = 5;
+var buffer = 5; // for a small buffer around the window, so we don't see lines around the edges
 
 // invisible canvas to which Mapzen elevation tiles will be drawn so we can calculate stuff
 var demCanvas = document.createElement('canvas');
@@ -13,7 +13,6 @@ var demData;
 var contourContext = contourCanvas.getContext('2d');
 var demContext = demCanvas.getContext('2d');
 
-// not too big or this can get hella slow
 var mapNode = d3.select('#map').node();
 var width = mapNode.offsetWidth + 2*buffer;
 var height = mapNode.offsetHeight + 2*buffer;
@@ -35,6 +34,8 @@ var contour = d3.contours()
 var contoursGeoData;
 
 var wait;
+
+// variables for styles etc. below
 
 var type = 'lines';
 var unit = 'ft';
@@ -74,6 +75,8 @@ window.onresize = function () {
   clearTimeout(wait);
   wait = setTimeout(getRelief,500);
 }
+
+/* UI event handlers */
 
 d3.selectAll('.settings-row.type input').on('change', function () {
   type = d3.select('.settings-row.type input:checked').node().value;
@@ -236,7 +239,6 @@ d3.select('#bathy-high-color').on('change', function () {
 });
 
 d3.selectAll('button[type="color"]').each(function() {
-  //d3.select('#' + this.id + '-text').node().value = toHex(this.value);
   var val = this.getAttribute('value');
   var el = this;
   var picker = new jscolor(this, {
@@ -314,6 +316,7 @@ d3.selectAll('.icon-left-open').on('click', function () {
   d3.select('#wrapper').classed('panel-open', false);
 });
 
+// short delay before searching after key press, so we don't send too many requests
 var searchtimer;
 d3.select('#search input').on('keyup', function () {
   if (d3.event.keyCode == 13) {
@@ -400,7 +403,7 @@ var hash = new L.Hash(map);
 map.setView(map_start_location.slice(0, 3), map_start_location[2]);
 
 map.on('moveend', function() {
-  // on move end we redraw the flow layer, so clear some stuff
+  // on move end we redraw the contour layer, so clear some stuff
 
   contourContext.clearRect(0,0,width,height);
   clearTimeout(wait);
@@ -436,7 +439,7 @@ var demLayer = new CanvasLayer({attribution: '<a href="https://aws.amazon.com/pu
 var pane = map.createPane('contour');
 pane.appendChild(contourCanvas);
 
-// custom map pane for the contours, above other layers
+// custom map pane for the labels
 var labelPane = map.createPane('labels');
 var referenceLayer = L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/toner-hybrid/{z}/{x}/{y}.png', {pane:'labels', attribution:'Label/road tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.'}).addTo(map);
 
@@ -448,6 +451,7 @@ function reverseTransform() {
   L.DomUtil.setPosition(contourCanvas, top_left);
 };
 
+// this is to ensure the "loading" message gets a chance to show. show it then do the function (usually getRelief or drawContours) on next frame
 function load (fn) {
   requestAnimationFrame(function () {
     d3.select('#loading').style('display', 'flex');
@@ -455,6 +459,7 @@ function load (fn) {
   });
 }
 
+// after terrain tiles are loaded, kick things off by drawing them to a canvas
 function getRelief(){
   load(function() {
     // reset canvases
@@ -473,6 +478,7 @@ function getRelief(){
   });
 }
 
+// calculate contours
 function getContours () {
   var values = new Array(width*height);
   // get elevation values for pixels
@@ -480,7 +486,7 @@ function getContours () {
     for (var x=0; x < width; x++) {
       var i = getIndexForCoordinates(width, x,y);
       // x + y*width is the array position expected by the contours generator
-      values[x + y*width] = Math.round(elev(i, demData) * (unit == 'ft' ? 3.28084 : 1)); // converting meters to feet here. #USA!!!1
+      values[x + y*width] = Math.round(elev(i, demData) * (unit == 'ft' ? 3.28084 : 1));
     }
   }
 
@@ -499,23 +505,19 @@ function getContours () {
   }
   contour.thresholds(thresholds);
   
+  contoursGeoData = contour(values);  // this gets the contours geojson
 
-  contoursGeoData = contour(values);
+  hypsoColor.domain([min,max]);
 
-  //if (min < 0) {
-    // include blue bathymetric colors if anything is below sea level
-   // hypsoColor.domain([min,-1,0,max]).range(['#12405e', '#a3c9e2', '#486341', '#e5d9c9'])
-  //} else {
-    // otherwise just a green to tan range
-    hypsoColor.domain([min,max]);
-  //}
-
+  // update the index line options based on the current interval
   d3.selectAll('#major option')
     .html(function () {
       if (+this.value == 0) return 'None';
       return +this.value * interval;
     });
+  majorInterval = +d3.select('#major').node().value * interval;
 
+  // show bathymetry options if elevations include values below zero
   d3.select('#bathymetry').style('display', min < 0 ? 'block' : 'none');
   if (min < 0) {
     bathyColor.domain([min, -1]);
@@ -524,13 +526,13 @@ function getContours () {
     }
   }
 
-  majorInterval = +d3.select('#major').node().value * interval;
-
   drawContours();
 }
 
+// draw the map!
 function drawContours(svg) {
-  if (svg !== true) {
+  // svg option is for export
+  if (svg !== true) { // this is the normal canvas drawing
     contourContext.clearRect(0,0,width,height);
     contourContext.save();
     if (type == 'illuminated') {
@@ -541,30 +543,32 @@ function drawContours(svg) {
 
       contoursGeoData.forEach(function (c) {
         contourContext.beginPath();
-        if (c.value >= 0 || bathyColorType == 'none') {
+        if (c.value >= 0 || bathyColorType == 'none') { // for values above sea level (or if we aren't styling bahymetry)
           contourContext.shadowColor = shadowColor;
           contourContext.strokeStyle = highlightColor;
           if (colorType == 'hypso') contourContext.fillStyle = hypsoColor(c.value);
           else if (colorType == 'solid') contourContext.fillStyle = solidColor;
-          else contourContext.fillStyle = '#fff';
+          else contourContext.fillStyle = '#fff'; // fill can't really be transparent in this style, so "none" is actually white
         } else {
           // blue-ish shadow and highlight colors below sea level
+          // no user option for these colors because I'm lazy
           contourContext.shadowColor = '#4e5c66';
           contourContext.strokeStyle = 'rgba(224, 242, 255, .5)';
           if (bathyColorType == 'bathy') contourContext.fillStyle = bathyColor(c.value);
           else if (bathyColorType == 'solid') contourContext.fillStyle = oceanColor;
           else contourContext.fillStyle = '#fff';
         }
-        path(c);
+        path(c);  // draws the shape
         // draw the light stroke first, then the fill with drop shadow
         // the effect is a light edge on side and dark on the other, giving the raised/illuminated contour appearance
         contourContext.stroke(); 
         contourContext.fill();
       });
-    } else {
+    } else {  // regular contour lines
       contourContext.lineWidth = lineWidth;
       contourContext.strokeStyle = lineColor;
       if (colorType != 'hypso' && bathyColorType == 'none') {
+        // no fill or solid fill. we don't have to fill/stroke individual contours, but rather can do them all at once
         contourContext.beginPath();
         contoursGeoData.forEach(function (c) {
           if (majorInterval == 0 || c.value % majorInterval != 0) path(c);
@@ -575,6 +579,7 @@ function drawContours(svg) {
         }
         contourContext.stroke();
       } else {
+        // for hypsometric tints or a separate bathymetric fill, we have to fill contours one at a time
         contoursGeoData.forEach(function (c) {
           contourContext.beginPath();
           var fill;
@@ -595,6 +600,7 @@ function drawContours(svg) {
         });
       }
       
+      // draw thicker index lines, if desired
       if (majorInterval != 0) {
         contourContext.lineWidth = lineWidthMajor;
         contourContext.beginPath();
@@ -607,6 +613,7 @@ function drawContours(svg) {
     }
     contourContext.restore();
   } else {
+    // draw contours to SVG for export
     if (!contourSVG) {
       contourSVG = d3.select('body').append('svg');
     }
