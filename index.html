@@ -1,11 +1,10 @@
 <html>
 <head>
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans:400,400i,700" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+  <link href='https://api.mapbox.com/mapbox.js/v3.1.1/mapbox.css' rel='stylesheet' />
   <link rel="stylesheet" href="css/fontello.css" />
   <meta charset="utf-8">
-  <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+  <script src='https://api.mapbox.com/mapbox.js/v3.1.1/mapbox.js'></script>
   <script src="lib/leaflet-hash.js"></script>
   <script src="https://d3js.org/d3-selection.v1.min.js"></script>
   <script src="https://d3js.org/d3-contour.v1.min.js"></script>
@@ -44,6 +43,8 @@
       text-align: center;
       font-weight: bold;
       position: fixed;
+      width: 100%;
+      z-index: 5000;
     }
     #panels {
       position: absolute;
@@ -105,7 +106,8 @@
     }
     .leaflet-left {
       left: 60px;
-      transition: left: .5s;
+      transition: left .5s;
+      top: 30px;
     }
     .panel-open .leaflet-left {
       left: 360px;

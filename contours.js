@@ -62,8 +62,6 @@ var bathyColor = d3.scaleLinear()
 
 var contourSVG;
 
-var mapboxToken = 'pk.eyJ1IjoiYXhpc21hcHMiLCJhIjoieUlmVFRmRSJ9.CpIxovz1TUWe_ecNLFuHNg';
-
 window.onresize = function () {
   width = mapNode.offsetWidth + 2*buffer;
   height = mapNode.offsetHeight + 2*buffer;
@@ -343,7 +341,7 @@ function search (val) {
       .selectAll('.search-result').remove();
     d3.select('body').on('click.search', null);
   }
-  var geocodeURL = 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(val) + '.json?language=en&types=place,locality,neighborhood,poi&access_token=' + mapboxToken;
+  var geocodeURL = 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(val) + '.json?language=en&types=place,locality,neighborhood,poi&access_token=' + L.mapbox.accessToken;
   d3.json(geocodeURL, function (error, json) {
     if (json && json.features && json.features.length) {
       var restults = d3.select('#search-results').style('display', 'block')
@@ -398,7 +396,19 @@ if (url_hash.length == 3) {
     map_start_location = map_start_location.map(Number);
 }
 
-var map = L.map('map',{scrollWheelZoom: false});
+/* 
+*
+*
+The good stuff starts from here 
+*
+*
+*/
+
+/* Set up the map*/
+
+L.mapbox.accessToken = 'pk.eyJ1IjoiYXdvb2RydWZmIiwiYSI6IktndnRPLU0ifQ.OMo9_1sJGjpSUNiJPBGA9A';
+
+var map = L.mapbox.map('map',null,{scrollWheelZoom: false});
 var hash = new L.Hash(map);
 map.setView(map_start_location.slice(0, 3), map_start_location[2]);
 
@@ -441,8 +451,11 @@ pane.appendChild(contourCanvas);
 
 // custom map pane for the labels
 var labelPane = map.createPane('labels');
-var referenceLayer = L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/toner-hybrid/{z}/{x}/{y}.png', {pane:'labels', attribution:'Label/road tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.'}).addTo(map);
-
+var referenceLayer = L.mapbox.styleLayer('mapbox://styles/awoodruff/cjggk1nwn000f2rjsi5x4iha1', {
+  minZoom: 0,
+  maxZoom: 18,
+  pane: 'labels',
+}).addTo(map);
 reverseTransform();
 
 // this resets our canvas back to top left of the window after panning the map
