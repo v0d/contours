@@ -453,7 +453,7 @@ pane.appendChild(contourCanvas);
 var labelPane = map.createPane('labels');
 var referenceLayer = L.mapbox.styleLayer('mapbox://styles/awoodruff/cjggk1nwn000f2rjsi5x4iha1', {
   minZoom: 0,
-  maxZoom: 18,
+  maxZoom: 15,
   pane: 'labels',
 }).addTo(map);
 reverseTransform();
