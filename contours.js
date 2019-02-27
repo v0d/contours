@@ -1,3 +1,20 @@
+if (!HTMLCanvasElement.prototype.toBlob) {
+ Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
+  value: function (callback, type, quality) {
+
+    var binStr = atob( this.toDataURL(type, quality).split(',')[1] ),
+        len = binStr.length,
+        arr = new Uint8Array(len);
+
+    for (var i=0; i<len; i++ ) {
+     arr[i] = binStr.charCodeAt(i);
+    }
+
+    callback( new Blob( [arr], {type: type || 'image/png'} ) );
+  }
+ });
+}
+
 // canvas on which the contours will be drawn
 var contourCanvas = document.createElement('canvas');
 contourCanvas.id='contours';
@@ -695,18 +712,45 @@ function downloadPNG () {
 
   /* In addition to <a>'s "download" attribute, you can define HTTP-style headers */
   dt = dt.replace(/^data:application\/octet-stream/, 'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=Canvas.png');
-
+  
   var tempLink = document.createElement('a');
   tempLink.style.display = 'none';
-  tempLink.href = dt;
-  tempLink.setAttribute('download', 'contours.png');
-  if (typeof tempLink.download === 'undefined') {
+
+  newCanvas.toBlob(function(blob) {
+    tempLink.href = window.URL.createObjectURL(blob);
+    tempLink.download = 'contours.png';
+    if (typeof tempLink.download === 'undefined') {
       tempLink.setAttribute('target', '_blank');
-  }
+    }
+    document.body.appendChild(tempLink);
+    tempLink.click();
+    document.body.removeChild(tempLink);
+    //var linkText = document.createTextNode(canvas.width + "px");
+    //a.appendChild(linkText);
+  }, "image/png");
+
   
-  document.body.appendChild(tempLink);
-  tempLink.click();
-  document.body.removeChild(tempLink);
+  // tempLink.href = dt;
+  // tempLink.setAttribute('download', 'contours.png');
+  // if (typeof tempLink.download === 'undefined') {
+  //     tempLink.setAttribute('target', '_blank');
+  // }
+  
+  
+
+  /* For later - works better for large images?
+// https://stackoverflow.com/questions/36918075/is-it-possible-to-programmatically-detect-size-limit-for-data-url
+
+var makeButtonUsingBlob = function (canvas, a) {
+  canvas.toBlob(function(blob) {
+    a.href = window.URL.createObjectURL(blob);
+    a.download = "example.jpg";
+    var linkText = document.createTextNode(canvas.width + "px");
+    a.appendChild(linkText);
+  }, "image/jpeg", 0.7);
+};
+
+*/
 }
 
 function downloadSVG () {
