@@ -61,7 +61,7 @@ var lineWidth = .75;
 var lineWidthMajor = 1.5;
 var lineColor = '#8c7556';
 
-var highlightColor = 'rgba(177,174,164,.5)';
+var highlightColor = 'rgba(255,251,236,.5)';
 var shadowColor = '#5b5143';
 var shadowSize = 2;
 
@@ -69,8 +69,8 @@ var colorType = 'none';
 var solidColor = '#fffcfa';
 var hypsoColor = d3.scaleLinear()
   .domain([0, 6000])
-  .range(["#486341", "#e5d9c9"])
-  .interpolate(d3.interpolateHcl);
+  .range(["#79a483", "#ffdecb"])
+  .interpolate(d3.interpolateHclLong);
 var oceanColor = '#d5f2ff';
 var bathyColorType = 'none';
 var bathyColor = d3.scaleLinear()
@@ -423,7 +423,7 @@ The good stuff starts from here
 
 /* Set up the map*/
 
-L.mapbox.accessToken = 'pk.eyJ1IjoiYXdvb2RydWZmIiwiYSI6IktndnRPLU0ifQ.OMo9_1sJGjpSUNiJPBGA9A';
+L.mapbox.accessToken = 'pk.eyJ1IjoiYXhpc21hcHMiLCJhIjoieUlmVFRmRSJ9.CpIxovz1TUWe_ecNLFuHNg';
 
 var map = L.mapbox.map('map',null,{scrollWheelZoom: false});
 var hash = new L.Hash(map);
@@ -520,6 +520,8 @@ function getContours () {
     }
   }
 
+  var valuesCopy = values.concat().sort((a,b) => a-b);
+
   max = d3.max(values);
   min = d3.min(values);
 
@@ -528,9 +530,21 @@ function getContours () {
   max = Math.ceil(max/interval) * interval;
   min = Math.floor(min/interval) * interval;
 
+  // throw away value ranges that seem to be junk (< 50 pixels)
+  var validThresholds = [];
+  for (var i = min; i <= max; i += interval) {
+    var f = valuesCopy.filter(v => {
+      return v >= i && v < (i + interval)
+    });
+    if (f.length > 50) validThresholds.push(i);
+  }
+
+  min = validThresholds[0];
+  max = validThresholds[validThresholds.length - 1];
+
   // the countour line values
   thresholds = [];
-  for (var i = min; i <= max; i += interval) {
+  for (i = min; i <= max; i += interval) {
     thresholds.push(i);
   }
   contour.thresholds(thresholds);
@@ -565,6 +579,7 @@ function drawContours(svg) {
   if (svg !== true) { // this is the normal canvas drawing
     contourContext.clearRect(0,0,width,height);
     contourContext.save();
+    contourContext.lineJoin = 'round';
     if (type == 'illuminated') {
       contourContext.lineWidth = shadowSize + 1;
       contourContext.shadowBlur = shadowSize;
