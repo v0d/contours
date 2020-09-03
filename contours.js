@@ -468,7 +468,7 @@ pane.appendChild(contourCanvas);
 
 // custom map pane for the labels
 var labelPane = map.createPane('labels');
-var referenceLayer = L.mapbox.styleLayer('mapbox://styles/awoodruff/cjggk1nwn000f2rjsi5x4iha1', {
+var referenceLayer = L.tileLayer('http://tile.stamen.com/toner-labels/{z}/{x}/{y}.png', {
   minZoom: 0,
   maxZoom: 15,
   pane: 'labels',
