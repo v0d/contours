@@ -59,7 +59,7 @@ var unit = 'm';
 
 var lineWidth = .75;
 var lineWidthMajor = 1.5;
-var lineColor = '#8c7556';
+var lineColor = '#000000';
 
 var highlightColor = 'rgba(255,251,236,.5)';
 var shadowColor = '#5b5143';
