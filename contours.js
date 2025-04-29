@@ -55,7 +55,7 @@ var wait;
 // variables for styles etc. below
 
 var type = 'lines';
-var unit = 'ft';
+var unit = 'm';
 
 var lineWidth = .75;
 var lineWidthMajor = 1.5;
