@@ -28,7 +28,7 @@ var demImageData;
 var demData;
 
 var contourContext = contourCanvas.getContext('2d');
-var demContext = demCanvas.getContext('2d');
+var demContext = demCanvas.getContext('2d', { willReadFrequently: true });
 
 var mapNode = d3.select('#map').node();
 var width = mapNode.offsetWidth + 2*buffer;
@@ -424,7 +424,7 @@ The good stuff starts from here
 /* Set up the map*/
 
 L.mapbox.accessToken = 'pk.eyJ1IjoiYXhpc21hcHMiLCJhIjoieUlmVFRmRSJ9.CpIxovz1TUWe_ecNLFuHNg';
-
+L.mapbox.accessToken = 'pk.eyJ1Ijoid3V5aXNoYW4iLCJhIjoiY21hMnlrYW11MnEwdjJrc2VmbzY0cjJnMSJ9.qc_tZy7NqDpNjkwZ41xh5Q';
 var map = L.mapbox.map('map',null,{scrollWheelZoom: false});
 var hash = new L.Hash(map);
 map.setView(map_start_location.slice(0, 3), map_start_location[2]);
