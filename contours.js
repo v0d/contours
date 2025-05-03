@@ -842,3 +842,56 @@ function toHex (rgba) {
   var b = numbers[2];
   return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
+
+function exportScaledSVG(targetWidth = 2200) {
+  const aspectRatio = 14 / 22;
+  const targetHeight = Math.round(targetWidth * aspectRatio);
+
+  const scaleX = targetWidth / width;
+  const scaleY = targetHeight / height;
+
+  if (!contourSVG) {
+    contourSVG = d3.select('body').append('svg');
+  }
+
+  contourSVG
+    .attr('width', targetWidth)
+    .attr('height', targetHeight)
+    .attr('viewBox', `0 0 ${targetWidth} ${targetHeight}`)
+    .selectAll('path').remove();
+
+  contourSVG.selectAll('path.stroke')
+    .data(contoursGeoData)
+    .enter()
+    .append('path')
+    .attr('d', function(d) {
+      return svgPath(d)
+        .replace(/([0-9.-]+),([0-9.-]+)/g, (_, x, y) =>
+          `${(+x * scaleX).toFixed(2)},${(+y * scaleY).toFixed(2)}`
+        );
+    })
+    .attr('stroke', type == 'lines' ? lineColor : highlightColor)
+    .attr('stroke-width', function (d) {
+      return type == 'lines'
+        ? (majorInterval != 0 && d.value % majorInterval == 0 ? lineWidthMajor : lineWidth)
+        : shadowSize;
+    })
+    .attr('fill', function (d) {
+      if (d.value >= 0 || bathyColorType == 'none') {
+        if (colorType == 'hypso') return hypsoColor(d.value);
+        else if (colorType == 'solid') return solidColor;
+        else if (bathyColorType != 'none') return '#fff';
+      } else {
+        if (bathyColorType == 'bathy') return bathyColor(d.value);
+        else if (bathyColorType == 'solid') return oceanColor;
+      }
+      return 'none';
+    })
+    .attr('id', function (d) {
+      return 'elev-' + d.value;
+    });
+
+  const svgData = contourSVG.node().outerHTML;
+  download(svgData, 'contours_scaled.svg', 'image/svg+xml;charset=utf-8');
+}
+
