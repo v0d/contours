@@ -325,7 +325,9 @@ d3.select('input[type="checkbox"]').on('change', function () {
 d3.select('#download-geojson').on('click', downloadGeoJson);
 d3.select('#download-png').on('click', downloadPNG);
 d3.select('#download-svg').on('click', downloadSVG);
-
+d3.select('#download-scaled-svg').on('click', function () {
+  exportScaledSVG(); // default size 2200px wide with 14:22 ratio
+});
 d3.selectAll('.icon-left-open').on('click', function () {
   d3.selectAll('.show').classed('show', false);
   d3.select('#wrapper').classed('panel-open', false);
